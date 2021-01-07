@@ -1,6 +1,5 @@
 export 'validator_tag.dart';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 abstract class Rule {
@@ -29,13 +28,24 @@ typedef ValueCallback<T> = T Function();
 _message(dynamic message) {
   if (message is String) return message;
   if (message is ValueCallback<String>) return message();
-  throw "message does not provide any types other than String and ValueCallback<String>";
+  return '';
+  // throw "message does not provide any types other than String and ValueCallback<String>";
 }
 
 _comparativeValue<T>(dynamic value) {
   if (value is ValueCallback<T>) return value();
   if (value is T) return value;
   throw "value does not provide any types other than $T and ValueCallback<$T>";
+}
+
+class CustomRegex extends Rule {
+  CustomRegex({@required this.regex, this.message});
+
+  final RegExp regex;
+  final dynamic message;
+
+  @override
+  ValidResult validate(String value) => ValidResult(pass: regex.hasMatch(value), message: _message(message));
 }
 
 ///必填验证
@@ -45,8 +55,7 @@ class Required extends Rule {
   final dynamic message;
 
   @override
-  ValidResult validate(String value) => ValidResult(
-      pass: value != "" && value != null, message: _message(message));
+  ValidResult validate(String value) => ValidResult(pass: value != "" && value != null, message: _message(message));
 }
 
 /// 邮箱验证
@@ -57,8 +66,7 @@ class Email extends Rule {
 
   @override
   ValidResult validate(String value) => ValidResult(
-      pass: RegExp(
-              r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+      pass: RegExp(r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
           .hasMatch(value),
       message: _message(message));
 }
@@ -70,10 +78,7 @@ class Number extends Rule {
   final dynamic message;
 
   @override
-  ValidResult validate(String value) => ValidResult(
-      pass: RegExp(r"^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$")
-          .hasMatch(value),
-      message: _message(message));
+  ValidResult validate(String value) => ValidResult(pass: RegExp(r"^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$").hasMatch(value), message: _message(message));
 }
 
 /// 数字验证， 不带小数点
@@ -83,8 +88,7 @@ class Digit extends Rule {
   final dynamic message;
 
   @override
-  ValidResult validate(String value) => ValidResult(
-      pass: RegExp(r"^\d+$").hasMatch(value), message: _message(message));
+  ValidResult validate(String value) => ValidResult(pass: RegExp(r"^\d+$").hasMatch(value), message: _message(message));
 }
 
 /// qq验证
@@ -94,9 +98,7 @@ class QQ extends Rule {
   final dynamic message;
 
   @override
-  ValidResult validate(String value) => ValidResult(
-      pass: RegExp(r"^[1-9][0-9]{4,14}$").hasMatch(value),
-      message: _message(message));
+  ValidResult validate(String value) => ValidResult(pass: RegExp(r"^[1-9][0-9]{4,14}$").hasMatch(value), message: _message(message));
 }
 
 /// 手机号验证
@@ -106,9 +108,7 @@ class Mobile extends Rule {
   final dynamic message;
 
   @override
-  ValidResult validate(String value) => ValidResult(
-      pass: RegExp(r"^((1)+\d{10})$").hasMatch(value) && value.length == 11,
-      message: _message(message));
+  ValidResult validate(String value) => ValidResult(pass: RegExp(r"^((1)+\d{10})$").hasMatch(value) && value.length == 11, message: _message(message));
 }
 
 /// 电话号码验证
@@ -119,9 +119,9 @@ class Phone extends Rule {
 
   @override
   ValidResult validate(String value) => ValidResult(
-      pass: RegExp(
-              r"^((\d{10,11})|^((\d{7,8})|(\d{4}|\d{3})-(\d{7,8})|(\d{4}|\d{3})-(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1})|(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1}))$)$")
-          .hasMatch(value),
+      pass:
+          RegExp(r"^((\d{10,11})|^((\d{7,8})|(\d{4}|\d{3})-(\d{7,8})|(\d{4}|\d{3})-(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1})|(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1}))$)$")
+              .hasMatch(value),
       message: _message(message));
 }
 
@@ -132,9 +132,7 @@ class IllegalChar extends Rule {
   final dynamic message;
 
   @override
-  ValidResult validate(String value) => ValidResult(
-      pass: RegExp(r"""/[&\\<>'"]""").hasMatch(value) && value.length == 11,
-      message: _message(message));
+  ValidResult validate(String value) => ValidResult(pass: RegExp(r"""/[&\\<>'"]""").hasMatch(value) && value.length == 11, message: _message(message));
 }
 
 /// 邮编验证
@@ -144,9 +142,7 @@ class PostCode extends Rule {
   final dynamic message;
 
   @override
-  ValidResult validate(String value) => ValidResult(
-      pass: RegExp(r"^[0-9]{6}$").hasMatch(value) && value.length == 11,
-      message: _message(message));
+  ValidResult validate(String value) => ValidResult(pass: RegExp(r"^[0-9]{6}$").hasMatch(value) && value.length == 11, message: _message(message));
 }
 
 /// 中文和字母
@@ -156,9 +152,7 @@ class ChineseLetter extends Rule {
   final dynamic message;
 
   @override
-  ValidResult validate(String value) => ValidResult(
-      pass: RegExp(r"^([\u4e00-\u9fa5]|[a-zA-Z])*$").hasMatch(value),
-      message: _message(message));
+  ValidResult validate(String value) => ValidResult(pass: RegExp(r"^([\u4e00-\u9fa5]|[a-zA-Z])*$").hasMatch(value), message: _message(message));
 }
 
 /// 数字字符串验证
@@ -168,9 +162,25 @@ class NumberLetter extends Rule {
   final dynamic message;
 
   @override
-  ValidResult validate(String value) => ValidResult(
-      pass: RegExp(r"^([0-9]|[a-zA-Z])*$").hasMatch(value),
-      message: _message(message));
+  ValidResult validate(String value) => ValidResult(pass: RegExp(r"^([0-9]|[a-zA-Z])*$").hasMatch(value), message: _message(message));
+}
+
+class LowerLetter extends Rule {
+  LowerLetter({this.message});
+
+  final dynamic message;
+
+  @override
+  ValidResult validate(String value) => ValidResult(pass: RegExp(r"(?=.*[a-z])").hasMatch(value), message: _message(message));
+}
+
+class UpperLetter extends Rule {
+  UpperLetter({this.message});
+
+  final dynamic message;
+
+  @override
+  ValidResult validate(String value) => ValidResult(pass: RegExp(r"(?=.*[A-Z])").hasMatch(value), message: _message(message));
 }
 
 /// 最小长度验证
@@ -183,10 +193,7 @@ class MinLength extends Rule {
 
   @override
   ValidResult validate(value) => ValidResult(
-      pass: closed == true
-          ? value.length >= _comparativeValue<int>(_value)
-          : value.length > _comparativeValue<int>(_value),
-      message: _message(message));
+      pass: closed == true ? value.length >= _comparativeValue<int>(_value) : value.length > _comparativeValue<int>(_value), message: _message(message));
 }
 
 /// 最大长度验证
@@ -199,10 +206,7 @@ class MaxLength extends Rule {
 
   @override
   ValidResult validate(String value) => ValidResult(
-      pass: closed == true
-          ? value.length <= _comparativeValue<int>(_value)
-          : value.length < _comparativeValue<int>(_value),
-      message: _message(message));
+      pass: closed == true ? value.length <= _comparativeValue<int>(_value) : value.length < _comparativeValue<int>(_value), message: _message(message));
 }
 
 class Section {
@@ -239,9 +243,7 @@ class RangeLength extends Rule {
     } else {
       maxBoolValue = value.length < _comparativeValue<int>(max.value);
     }
-    return ValidResult(
-        pass: minBoolValue == true && maxBoolValue == true,
-        message: _message(message));
+    return ValidResult(pass: minBoolValue == true && maxBoolValue == true, message: _message(message));
   }
 }
 
@@ -267,9 +269,7 @@ class Range extends Rule {
     } else {
       maxBoolValue = num.parse(value) < _comparativeValue<num>(max.value);
     }
-    return ValidResult(
-        pass: minBoolValue == true && maxBoolValue == true,
-        message: _message(message));
+    return ValidResult(pass: minBoolValue == true && maxBoolValue == true, message: _message(message));
   }
 }
 
@@ -283,10 +283,7 @@ class Min extends Rule {
 
   @override
   ValidResult validate(value) => ValidResult(
-      pass: closed == true
-          ? num.parse(value) >= _comparativeValue<num>(value)
-          : num.parse(value) > _comparativeValue<num>(value),
-      message: _message(message));
+      pass: closed == true ? num.parse(value) >= _comparativeValue<num>(value) : num.parse(value) > _comparativeValue<num>(value), message: _message(message));
 }
 
 /// 最大值验证
@@ -299,10 +296,7 @@ class Max extends Rule {
 
   @override
   ValidResult validate(value) => ValidResult(
-      pass: closed == true
-          ? num.parse(value) <= _comparativeValue<num>(value)
-          : num.parse(value) < _comparativeValue<num>(value),
-      message: _message(message));
+      pass: closed == true ? num.parse(value) <= _comparativeValue<num>(value) : num.parse(value) < _comparativeValue<num>(value), message: _message(message));
 }
 
 ///    验证器
@@ -338,8 +332,8 @@ class Validator {
   addRules(Map<String, List<Rule>> rules) => rules.addAll(rules);
 
   ValidResult validate(dynamic key, dynamic value) {
-    ValidResult validResult;
     if (!rules.containsKey(key)) throw "The key [$key] not exist in rules";
+    ValidResult validResult;
     List<Rule> ruleList = rules[key];
     for (int i = 0; i < ruleList.length; i++) {
       validResult = ruleList.elementAt(i).validate(value);
